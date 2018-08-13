@@ -15,14 +15,18 @@
  */
 package org.springframework.boot.enhancer;
 
+import org.springframework.core.type.AnnotationMetadata;
+
 /**
  * @author Dave Syer
  *
  */
-public interface Initializer {
-	String metadata();
+public interface MetadataProvider {
+	String raw();
 
-	default void initialize() {
-		System.err.println("Default: " + metadata());
+	AnnotationMetadata deserialize(MetadataProvider provider);
+
+	default AnnotationMetadata initialize() {
+		return deserialize(this);
 	}
 }
