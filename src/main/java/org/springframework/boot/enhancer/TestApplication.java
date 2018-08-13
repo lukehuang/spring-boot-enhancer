@@ -1,8 +1,5 @@
 package org.springframework.boot.enhancer;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.builder.SpringApplicationBuilder;
@@ -15,9 +12,6 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 public class TestApplication {
 
-	@Autowired
-	private ObjectMapper mapper;
-
 	@GetMapping("/")
 	public String home() {
 		return "Hello";
@@ -27,11 +21,7 @@ public class TestApplication {
 	public CommandLineRunner runner() {
 		return args -> {
 			if (this instanceof MetadataProvider) {
-				String json = mapper
-						.writeValueAsString(((MetadataProvider) this).initialize());
-				System.err.println("Initializing.." + json);
-				AnnotationMetadata metadata = mapper.readValue(json,
-						NonStandardAnnotationMetadata.class);
+				AnnotationMetadata metadata = ((MetadataProvider) this).initialize();
 				System.err.println("Initialized.." + metadata);
 			}
 		};

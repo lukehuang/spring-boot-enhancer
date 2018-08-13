@@ -21,7 +21,6 @@ import com.esotericsoftware.kryo.Kryo;
 import com.esotericsoftware.kryo.Serializer;
 import com.esotericsoftware.kryo.io.Input;
 import com.esotericsoftware.kryo.io.Output;
-import com.fasterxml.jackson.databind.ObjectMapper;
 
 import org.springframework.boot.type.classreading.ConcurrentReferenceCachingMetadataReaderFactory;
 import org.springframework.core.type.AnnotationMetadata;
@@ -38,8 +37,6 @@ public class Converter {
 	private ConcurrentReferenceCachingMetadataReaderFactory factory = new ConcurrentReferenceCachingMetadataReaderFactory(
 			getClass().getClassLoader());
 
-	private static ObjectMapper mapper = new ObjectMapper();
-
 	private static Kryo kryo = new Kryo();
 
 	static {
@@ -47,7 +44,7 @@ public class Converter {
 				new SimpleMetadataReaderSerializer());
 	}
 
-	static public AnnotationMetadata deserialize(MetadataProvider provider) {
+	public static AnnotationMetadata deserialize(MetadataProvider provider) {
 		try (Input stream = new Input(Base64Utils.decodeFromString(provider.raw()))) {
 			AnnotationMetadata metadata = (AnnotationMetadata) kryo
 					.readClassAndObject(stream);
@@ -70,8 +67,7 @@ public class Converter {
 		catch (Exception e) {
 			throw new IllegalStateException(e);
 		}
-		String value = Base64Utils.encodeToString(bytes.toByteArray());
-		return value;
+		return Base64Utils.encodeToString(bytes.toByteArray());
 	}
 
 }
