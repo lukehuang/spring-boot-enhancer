@@ -20,9 +20,9 @@ package org.springframework.boot.enhancer;
  *
  */
 public interface Initializer {
-	String configuration();
+	String metadata();
 
 	default void initialize() {
-		System.err.println("Default: " + configuration());
+		System.err.println("Default: " + metadata());
 	}
 }

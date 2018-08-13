@@ -55,7 +55,7 @@ public class SpringPlugin implements Plugin {
 				new SimpleMetadataReaderSerializer());
 	}
 
-	private static final String CONFIG = "CONFIG";
+	private static final String METADATA = "__ANNOTATION_METADATA__";
 
 	@Override
 	public boolean matches(TypeDescription target) {
@@ -84,6 +84,16 @@ public class SpringPlugin implements Plugin {
 	@Override
 	public Builder<?> apply(Builder<?> builder, TypeDescription typeDescription) {
 		logger.info("Instrumenting: " + typeDescription.getActualName());
+		String value = getMetadata(typeDescription);
+		return builder
+				.defineField(METADATA, String.class, Modifier.STATIC | Modifier.PUBLIC)
+				.value(value)
+				.method(ElementMatchers.isDeclaredBy(Initializer.class)
+						.and(ElementMatchers.named("metadata")))
+				.intercept(FieldAccessor.ofField(METADATA)).implement(Initializer.class);
+	}
+
+	private String getMetadata(TypeDescription typeDescription) {
 		Class<?> type = ClassUtils.resolveClassName(typeDescription.getActualName(),
 				Configuration.class.getClassLoader());
 		ByteArrayOutputStream bytes = new ByteArrayOutputStream();
@@ -91,12 +101,7 @@ public class SpringPlugin implements Plugin {
 		kryo.writeClassAndObject(stream, new StandardAnnotationMetadata(type));
 		stream.close();
 		String value = Base64Utils.encodeToString(bytes.toByteArray());
-		return builder
-				.defineField(CONFIG, String.class, Modifier.STATIC | Modifier.PUBLIC)
-				.value(value)
-				.method(ElementMatchers.isDeclaredBy(Initializer.class)
-						.and(ElementMatchers.named("configuration")))
-				.intercept(FieldAccessor.ofField(CONFIG)).implement(Initializer.class);
+		return value;
 	}
 
 }
